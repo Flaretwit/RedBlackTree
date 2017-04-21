@@ -13,18 +13,59 @@ struct node* link[2] - array of 2 pointers (right and left), greatly simplifies 
 #include <algorithm>
 using namespace std;
 
-int is_red(struct node* root);
-
+//Definition of the struct: node
 struct node {
-  int red;
+  int red; //1 if red, 0 if black
   int data;
-  struct node *link[2];
+  struct node *link[2]; //link[0] represents left pointer, link[1] right pointer
 };
 
 struct tree {
   struct node* root;
 };
 
+int is_red(struct node* root);
+struct node* single(struct node* root, int dir);
+struct node* double(struct node* root, int dir);
+int assert(struct node* root);
+struct node* make_node(int data);
+int insert(struct tree* tree, int data) ;
+
+
+
+int main() {
+
+  return 0;
+}
+
+struct node* insert_r(struct node* root, int data)
+{
+  if(root == NULL) {
+    root = make_node(data);
+  }
+  else if(data != root->data)
+  {
+    //if data greater than root->data, dir = 1 and goes right
+    //if data not greater than root, dir = 0 and goes left :D
+    int dir = root->data < data;
+    root->link[dir] = insert_r(root->link[dir], data);
+
+
+    /* REBALANCE TREE */
+
+  }
+  return root;
+}
+
+int insert(struct tree* tree, int data)
+{
+  tree->root = insert_r(tree->root, data);
+  tree->root->red = 0;
+  //sets the root to black to avoid a red violation at the root
+  return 1;
+}
+
+//checks if the node has red color;
 int is_red(struct node* root)
 {
   return root != NULL && root->red == 1;
@@ -65,7 +106,7 @@ int assert(struct node* root)
     struct node* ln = root->link[0];
     struct node* rn = root->link[1];
 
-    // Consecutive red links
+    // Consecutive red links means a bad tree
     if(is_red(root))
     {
       if(is_red(ln) || is_red(rn))
@@ -100,7 +141,20 @@ int assert(struct node* root)
     {
       return 0;
     }
-
-
   }
+}
+//returns a node
+//defaults to red node because red violations are easier to fix
+struct node* make_node(int data)
+{
+  struct node* rn = malloc(sizeof *rn);
+
+  if(rn != NULL)
+  {
+    rn->data = data;
+    rn->red = 1; /* 1 is red, 0 is black*/
+    red->link[0] = NULL;
+    red->link[1] = NULL;
+  }
+  return rn;
 }
