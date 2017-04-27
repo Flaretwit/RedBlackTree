@@ -25,20 +25,33 @@ struct tree {
 };
 
 int is_red(struct node* root);
-struct node* single(struct node* root, int dir);
-struct node* double(struct node* root, int dir);
-int assert(struct node* root);
-struct node* make_node(int data);
-int insert(struct tree* tree, int data) ;
+node* single_r(node* root, int dir);
+node* double_r(node* root, int dir);
+int assert(node* root);
+node* make_node(int data);
+int insert(tree* tree, int data);
+node* insert_r(node* root, int data);
+int getDepth(int level, int number, node* root);
+void printTree(node* n, node* root);
 
 
 
 int main() {
+  tree* t = new tree();
+  insert(t, 6);
+  insert(t, 7);
+  insert(t, 4);
+  insert(t, 2);
+  insert(t, 1);
+  insert(t, 8);
+  insert(t, 9);
+  insert(t, 5);
 
+  printTree(t->root, t->root);
   return 0;
 }
 
-struct node* insert_r(struct node* root, int data)
+node* insert_r(node* root, int data)
 {
   if(root == NULL) {
     root = make_node(data);
@@ -52,6 +65,29 @@ struct node* insert_r(struct node* root, int data)
 
 
     /* REBALANCE TREE */
+
+    if(is_red(root->link[dir]))
+    {
+      if(is_red(root->link[!dir]))
+      {
+        // Case 1
+        root->red = 1;
+        root->link[0]->red = 0;
+        root->link[1]->red = 0;
+      }
+      else
+      {
+        //Case 2 and 3
+        if(is_red(root->link[dir]->link[dir]))
+        {
+          root = single_r(root, !dir);
+        }
+        else if (is_red(root->link[dir]->link[!dir]))
+        {
+          root = double_r(root, !dir);
+        }
+      }
+    }
 
   }
   return root;
@@ -73,7 +109,7 @@ int is_red(struct node* root)
 
 //conducts a single rotation of the RBT, 1 is right, 0 is left
 //returns the new root or top of the 3 nodes
-struct node* single(struct node* root, int dir)
+node* single_r(node* root, int dir)
 {
   struct node* save = root->link[!dir];
   root->link[!dir] = save->link[dir];
@@ -85,11 +121,11 @@ struct node* single(struct node* root, int dir)
   return save;
 }
 //rotates twice
-struct node* double(struct node* root, int dir)
+node* double_r(node* root, int dir)
 {
-    root->link[!dir] = single(root->link[!dir], dir);
+    root->link[!dir] = single_r(root->link[!dir], dir);
 
-    return single(root, dir);
+    return single_r(root, dir);
 }
 
 //checks for violations in the tree by returning 0
@@ -145,16 +181,59 @@ int assert(struct node* root)
 }
 //returns a node
 //defaults to red node because red violations are easier to fix
-struct node* make_node(int data)
+node* make_node(int data)
 {
-  struct node* rn = malloc(sizeof *rn);
+  node* rn = new node();
 
   if(rn != NULL)
   {
     rn->data = data;
     rn->red = 1; /* 1 is red, 0 is black*/
-    red->link[0] = NULL;
-    red->link[1] = NULL;
+    rn->link[0] = NULL;
+    rn->link[1] = NULL;
   }
   return rn;
+}
+
+
+//gets depth of a particular number in the RBT
+int getDepth(int level, int number, node* root)
+{
+  if(root == NULL) {
+    return 0;
+  }
+  else if(root->data == number) {
+    return level;
+  }
+  int downLevel = getDepth(level + 1, number, root->link[0]);
+  if(downLevel != 0) {
+    return downLevel;
+  }
+  downLevel = getDepth(level + 1, number, root->link[1]);
+  return downLevel;
+}
+//prints the red and black tree
+void printTree(node* n, node* root)
+{
+     if (n == NULL)
+          return;
+     /* first recur on right child */
+     printTree(n->link[1], root);
+
+     int num = getDepth(0, n->data, root);
+     for(int i = 0; i < num; i++) {
+       cout << "\t" << flush;
+     }
+     /* then print the data of the node */
+     cout << " " << n->data << "," << flush;
+     if(n->red)
+     {
+       cout << "R" << endl;
+     }
+     else {
+       cout << "B" << endl;
+     }
+
+     /* now recur on left child */
+     printTree(n->link[0], root);
 }
