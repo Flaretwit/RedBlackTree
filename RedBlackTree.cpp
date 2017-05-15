@@ -6,7 +6,9 @@
 #include <fstream>
 #include <string>
 #include <string.h>
-
+#include <vector>
+#include <algorithm>
+#include <sstream>
 using namespace std;
 
 #define ADD 1
