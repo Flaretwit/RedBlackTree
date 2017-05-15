@@ -1,17 +1,18 @@
 //Red and Black Trees by Ke Shen
 
-//Members:
-/*Struct node
-int red -> 1 if the node is colored red, 0 if the node is black
-int data -> value of the node
-struct node* link[2] - array of 2 pointers (right and left), greatly simplifies rebalancing code
-*/
+
 
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <string.h>
-#include <cstring>
-#include <algorithm>
+
 using namespace std;
+
+#define ADD 1
+#define READ 2
+#define PRINT 3
+#define EXIT 4
 
 //Definition of the struct: node
 struct node {
@@ -33,22 +34,70 @@ int insert(tree* tree, int data);
 node* insert_r(node* root, int data);
 int getDepth(int level, int number, node* root);
 void printTree(node* n, node* root);
-
+int parseCommand(char *input);
+void split(string str, char delim, vector<int>*& result);
 
 
 int main() {
   tree* t = new tree();
-  insert(t, 6);
-  insert(t, 7);
-  insert(t, 4);
-  insert(t, 2);
-  insert(t, 1);
-  insert(t, 8);
-  insert(t, 9);
-  insert(t, 5);
 
-  printTree(t->root, t->root);
+  char input[80];
+  bool done = false;
+  while(!done) {
+    cout << "ADD, READ, OR PRINT, OR EXIT?" << endl;
+    cin >> input;
+    switch(parseCommand(input)) {
+      case ADD: {
+        char temp[80];
+        cout << "Enter an integer: " << flush;
+        cin >> temp;
+        int num = atoi(temp);
+        insert(t, num);
+        break;
+      }
+      case PRINT:
+        printTree(t->root, t->root);
+        break;
+      case READ: {
+        char* contents = new char [1000];
+        char filename[80];
+        vector<int> *result = new vector<int>;
+        cout << "Enter in the filename (with suffix): " << endl;
+        cin >> filename;
+        ifstream infile(filename);
+        //if unable to open the file
+        if(!infile) {
+            cout << "Unable to open the file ... exiting" << flush;
+            return -1;
+        }
+        infile.getline(contents, 1000, '\n');
+        split(contents, ',', result);
+        cout << "vector size" << result->size() << endl;
+        for(int i = 0; i < result->size(); i++) {
+          cout << "Results: " << result->at(i) << endl;
+          printTree(t->root, t->root);
+          insert(t, result->at(i));
+        }
+        break;
+      }
+      case EXIT:
+        done = true;
+        break;
+    }
+  }
   return 0;
+}
+
+//splits a string into a vector of ints
+void split(string str, char delim, vector<int>*& result) {
+  stringstream ss(str); // Turn the string into a stream.
+  string tok;
+
+  while(getline(ss, tok, delim)) {
+    result->push_back(atoi(tok.c_str()));
+    //cout << "Pushed back" << flush;
+  }
+
 }
 
 node* insert_r(node* root, int data)
@@ -92,7 +141,7 @@ node* insert_r(node* root, int data)
   }
   return root;
 }
-
+//calls the recursive insert function
 int insert(struct tree* tree, int data)
 {
   tree->root = insert_r(tree->root, data);
@@ -196,7 +245,7 @@ node* make_node(int data)
 }
 
 
-//gets depth of a particular number in the RBT
+//gets depth of a particular number in the tree
 int getDepth(int level, int number, node* root)
 {
   if(root == NULL) {
@@ -236,4 +285,28 @@ void printTree(node* n, node* root)
 
      /* now recur on left child */
      printTree(n->link[0], root);
+}
+
+
+//compares the input to known commands
+int parseCommand(char *input)
+{
+  for(int i = 0; i < strlen(input); i++) {
+		input[i] = toupper(input[i]);
+	}
+	if(!strcmp(input, "ADD")) {
+		return ADD;
+	}
+	else if(!strcmp(input, "READ")) {
+		return READ;
+	}
+	else if(!strcmp(input, "PRINT")) {
+		return PRINT;
+	}
+	else if(!strcmp(input, "EXIT")) {
+		return EXIT;
+	}
+	else {
+		return 0;
+	}
 }
