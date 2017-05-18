@@ -74,10 +74,7 @@ int main() {
         }
         infile.getline(contents, 1000, '\n');
         split(contents, ',', result);
-        cout << "vector size" << result->size() << endl;
         for(int i = 0; i < result->size(); i++) {
-          cout << "Results: " << result->at(i) << endl;
-          printTree(t->root, t->root);
           insert(t, result->at(i));
         }
         break;
@@ -113,10 +110,7 @@ node* insert_r(node* root, int data)
     //if data not greater than root, dir = 0 and goes left :D
     int dir = root->data < data;
     root->link[dir] = insert_r(root->link[dir], data);
-
-
     /* REBALANCE TREE */
-
     if(is_red(root->link[dir]))
     {
       if(is_red(root->link[!dir]))
@@ -128,7 +122,7 @@ node* insert_r(node* root, int data)
       }
       else
       {
-        //Case 2 and 3
+        //Case 2 and 3`
         if(is_red(root->link[dir]->link[dir]))
         {
           root = single_r(root, !dir);
@@ -174,7 +168,7 @@ node* single_r(node* root, int dir)
 //rotates twice
 node* double_r(node* root, int dir)
 {
-    root->link[!dir] = single_r(root->link[!dir], dir);
+    root->link[!dir] = single_r(root->link[!dir], !dir);
 
     return single_r(root, dir);
 }
