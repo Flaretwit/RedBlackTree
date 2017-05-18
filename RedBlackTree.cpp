@@ -1,7 +1,4 @@
 //Red and Black Trees by Ke Shen
-
-
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -15,6 +12,8 @@ using namespace std;
 #define READ 2
 #define PRINT 3
 #define EXIT 4
+#define SEARCH 5
+#define DELETE 6
 
 //Definition of the struct: node
 struct node {
@@ -38,7 +37,7 @@ int getDepth(int level, int number, node* root);
 void printTree(node* n, node* root);
 int parseCommand(char *input);
 void split(string str, char delim, vector<int>*& result);
-
+int search(node* root, int data);
 
 int main() {
   tree* t = new tree();
@@ -46,15 +45,14 @@ int main() {
   char input[80];
   bool done = false;
   while(!done) {
-    cout << "ADD, READ, OR PRINT, OR EXIT?" << endl;
+    cout << "ADD, READ, OR PRINT, SEARCH, DELETE OR EXIT?" << endl;
     cin >> input;
     switch(parseCommand(input)) {
       case ADD: {
         char temp[80];
         cout << "Enter an integer: " << flush;
         cin >> temp;
-        int num = atoi(temp);
-        insert(t, num);
+        insert(t, atoi(temp));
         break;
       }
       case PRINT:
@@ -79,12 +77,34 @@ int main() {
         }
         break;
       }
+      case SEARCH:
+        char temp[80];
+        cout << "What number do you want to search for? " << flush;
+        cin >> temp;
+        if(!search(t->root, atoi(temp))) {
+          cout << "Number not found." << flush;
+        }
+        else {
+          cout << "Number found." << flush;
+        }
+
       case EXIT:
         done = true;
         break;
     }
   }
   return 0;
+}
+
+int search(node* root, int data) {
+  if(root == NULL) {
+    return 0;
+  }
+  else if(root->data == data) {
+    return 1;
+  }
+  int dir = root->data < data;
+  search(root->link[dir], data);
 }
 
 //splits a string into a vector of ints
@@ -302,6 +322,9 @@ int parseCommand(char *input)
 	else if(!strcmp(input, "EXIT")) {
 		return EXIT;
 	}
+  else if(!strcmp(input, "SEARCH")) {
+    return SEARCH;
+  }
 	else {
 		return 0;
 	}
