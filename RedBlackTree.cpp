@@ -82,12 +82,12 @@ int main() {
         cout << "What number do you want to search for? " << flush;
         cin >> temp;
         if(!search(t->root, atoi(temp))) {
-          cout << "Number not found." << flush;
+          cout << "Number not found." << endl;
         }
         else {
-          cout << "Number found." << flush;
+          cout << "Number found." << endl;
         }
-
+        break;
       case EXIT:
         done = true;
         break;
@@ -96,6 +96,141 @@ int main() {
   return 0;
 }
 
+node* delete_r(node* root, int data, int *done)
+{
+    if (root == NULL)
+    {
+      *done = 1;
+    }
+    else
+    {
+      int dir;
+
+      if(root->data == data)
+      {
+        if(root->link[0] == NULL || root->link[1] == NULL)
+        {
+          node* save = root->link[root->link[0] == NULL];
+
+          /* Case 0 */
+          if(is_red(root))
+          {
+            *done = 1;
+          }
+          else if(is_red(save))
+          {
+            save->red = 0;
+            *done = 1;
+          }
+
+          free(root);
+          return save;
+        }
+        else
+        {
+          node* heir = root->link[0];
+          while(heir->link[1] != NULL)
+          {
+            heir = heir->link[1];
+          }
+
+          root->data = heir->data;
+          data = heir->data;
+        }
+      }
+
+      dir = root->data < data;
+      root->link[dir] = remove_r(root->link[dir], data, done);
+
+      if(!*done)
+      {
+        root = remove_balance(root, dir, done);
+      }
+    }
+
+    return root;
+}
+
+
+node* remove_balance(node* root, int dir, int *done)
+{
+    node* p = root;
+    node* s = root->link[!dir];
+
+    if(s != NULl && !is_red(s))
+    {
+      /* Black sibling cases */
+      if (!is_red(s->link[0]) && !is_red(s->link[1]))
+      {
+        if(is_red(p))
+        {
+          *done = 1;
+        }
+
+        p->red = 0;
+        s->red = 1;
+      }
+      else
+      {
+        int save = root-.red;
+        if(is_red(s->link[!dir]))
+        {
+            p = single_r(p, dir);
+        }
+        else
+        {
+            p = double_r(p, dir);
+        }
+        p->red = save;
+        p->link[0]->red = 0;
+        p->link[1]->red = 0;
+        *done = 1;
+      }
+    }
+
+    else if (s->link[dir] != NULL)
+    {
+       /* Red sibling cases */
+       node* r = s->link[dir];
+
+       if (!is_red(r->link[0]) && !is_red(r->link[1]))
+       {
+           p = single_R(p, dir);
+           p->link[dir]->link[!dir]->red = 1;
+       }
+       else
+       {
+           if (is_red(r->link[dir]))
+           {
+               s->link[dir] = single_r(r, !dir);
+           }
+
+           p = double_r(p, dir);
+           s->link[dir]->red = 0;
+           p->link[!dir]->red = 1;
+       }
+
+       p->red = 0;
+       p->link[dir]->red = 0;
+       *done = 1;
+   }
+   return p;
+}
+
+
+
+int remove(tree* tree, int data)
+{
+  int done = 0;
+  tree->root = remove_r(tree->root, data, &done);
+
+  if(tree->root != NULL)
+  {
+    tree->root->red = 0;
+  }
+
+  return 1;
+}
 int search(node* root, int data) {
   if(root == NULL) {
     return 0;
@@ -116,7 +251,6 @@ void split(string str, char delim, vector<int>*& result) {
     result->push_back(atoi(tok.c_str()));
     //cout << "Pushed back" << flush;
   }
-
 }
 
 node* insert_r(node* root, int data)
