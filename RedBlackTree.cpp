@@ -38,6 +38,11 @@ void printTree(node* n, node* root);
 int parseCommand(char *input);
 void split(string str, char delim, vector<int>*& result);
 int search(node* root, int data);
+node* remove_r(node* root, int data, int *done);
+int remove(tree* tree, int data);
+node* remove_balance(node* root, int dir, int *done);
+
+
 
 int main() {
   tree* t = new tree();
@@ -88,6 +93,18 @@ int main() {
           cout << "Number found." << endl;
         }
         break;
+      case DELETE:
+        char temp1[80];
+        cout << "What number do you want to delete? " << flush;
+        cin >> temp1;
+        if(search(t->root, atoi(temp1))) {
+          remove(t, atoi(temp1));
+          cout << atoi(temp1) << " removed" << endl;
+        }
+        else {
+          cout << "Number not located in the Red Black Tree." << endl;
+        }
+        break;
       case EXIT:
         done = true;
         break;
@@ -96,7 +113,7 @@ int main() {
   return 0;
 }
 
-node* delete_r(node* root, int data, int *done)
+node* remove_r(node* root, int data, int *done)
 {
     if (root == NULL)
     {
@@ -151,13 +168,12 @@ node* delete_r(node* root, int data, int *done)
     return root;
 }
 
-
 node* remove_balance(node* root, int dir, int *done)
 {
     node* p = root;
     node* s = root->link[!dir];
 
-    if(s != NULl && !is_red(s))
+    if(s != NULL && !is_red(s))
     {
       /* Black sibling cases */
       if (!is_red(s->link[0]) && !is_red(s->link[1]))
@@ -172,7 +188,7 @@ node* remove_balance(node* root, int dir, int *done)
       }
       else
       {
-        int save = root-.red;
+        int save = root->red;
         if(is_red(s->link[!dir]))
         {
             p = single_r(p, dir);
@@ -195,7 +211,7 @@ node* remove_balance(node* root, int dir, int *done)
 
        if (!is_red(r->link[0]) && !is_red(r->link[1]))
        {
-           p = single_R(p, dir);
+           p = single_r(p, dir);
            p->link[dir]->link[!dir]->red = 1;
        }
        else
@@ -458,6 +474,9 @@ int parseCommand(char *input)
 	}
   else if(!strcmp(input, "SEARCH")) {
     return SEARCH;
+  }
+  else if(!strcmp(input, "DELETE")) {
+    return DELETE;
   }
 	else {
 		return 0;
